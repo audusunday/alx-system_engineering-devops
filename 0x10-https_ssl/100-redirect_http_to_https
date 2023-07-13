@@ -1,0 +1,13 @@
+defaults
+  mode http
+  timeout client 15s
+  timeout connect 10s
+  timeout server 15s
+  timeout http-request 10s
+frontend sunnadu-tech-frontend
+    bind *:80
+    default_backend sunnadu-tech-backend
+backend sunnadu-tech-backend
+    balance roundrobin
+    server 136374-web-01 52.91.133.232:80 check
+    server 136374-web-02 18.233.64.139:80 check
