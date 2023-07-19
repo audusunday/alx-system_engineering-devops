@@ -1,13 +1,33 @@
+global
+  maxconn 2048
+  tune.ssl.default-dh-param 2048
+
 defaults
   mode http
   timeout client 15s
   timeout connect 10s
   timeout server 15s
   timeout http-request 10s
+  option forwardfor
+  option http-server-close
+
 frontend sunnadu-tech-frontend
     bind *:80
+    reqadd X-Forwarded-Proto:\ http
     default_backend sunnadu-tech-backend
+
+frontend www-https
+   bind *:443 ssl crt /etc/haproxy/certs/www.sunnadu.tech.pem
+   reqadd X-Forwarded-Proto:\ https
+   acl letsencrypt-acl path_beg /.well-known/acme-challenge/
+   use_backend letsencrypt-backend if letsencrypt-acl
+   default_backend sunnadu-tech-backend
+
 backend sunnadu-tech-backend
     balance roundrobin
+    redirect scheme https if !{ ssl_fc }
     server 136374-web-01 52.91.133.232:80 check
     server 136374-web-02 18.233.64.139:80 check
+
+ backend letsencrypt-backend
+    server letsencrypt 127.0.0.1:54321
