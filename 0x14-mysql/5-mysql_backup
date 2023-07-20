@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Check if the password argument is provided
+if [ -z "$1" ]; then
+  echo "Error: Please provide the MySQL root password as an argument."
+  exit 1
+fi
+
+# Set the date in the format day-month-year
+backup_date=$(date +%d-%m-%Y)
+
+# Set the file names
+dump_file="backup.sql"
+archive_file="$backup_date.tar.gz"
+
+# Perform MySQL dump
+mysqldump -u root -p"$1" --all-databases > "$dump_file"
+
+# Check if mysqldump was successful
+if [ $? -ne 0 ]; then
+  echo "Error: MySQL dump failed. Please check your credentials and try again."
+  exit 1
+fi
+
+# Create tar.gz archive
+tar -czvf "$archive_file" "$dump_file"
+
+# Clean up the dump file
+rm "$dump_file"
+
+echo "Backup completed successfully. Archive created: $archive_file"
